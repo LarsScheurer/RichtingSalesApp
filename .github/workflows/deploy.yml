@@ -1,0 +1,41 @@
+# In .github/workflows/deploy.yml
+
+name: Deploy Backend to Firebase
+
+# Deze workflow start automatisch als u code naar de 'main' branch in GitHub pusht
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_backend:
+    name: Deploy Backend to Firebase
+    # Draai deze stappen op een schone, nieuwe Linux-server van GitHub
+    runs-on: ubuntu-latest
+    steps:
+      # Stap 1: Download de meest recente code uit uw GitHub repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Stap 2: Installeer de juiste versie van Node.js op de server
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Stap 3: Installeer de backend-bibliotheken
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./functions # Belangrijk: voer dit uit in de 'functions' map
+
+      # Stap 4: Deploy de backend naar Firebase
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          action: deploy
+          project_id: 'richting-sales-d764a' # Uw project ID
+          args: --only functions
+        env:
+          # Gebruik het geheim dat we hebben ingesteld in de GitHub-instellingen
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
